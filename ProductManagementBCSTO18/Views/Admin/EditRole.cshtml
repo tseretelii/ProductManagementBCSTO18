@@ -1,0 +1,25 @@
+﻿@model ProductManagementBCSTO18.Models.VM.Admin.RolesViewModel
+
+@{
+    ViewData["Title"] = "Edit Role";
+}
+
+<h2>Edit Role</h2>
+
+<form asp-action="EditRole" method="post">
+    <input asp-for="Id" type="hidden" />
+
+    <div class="form-group">
+        <label asp-for="Name">Role Name</label>
+        <input asp-for="Name" class="form-control" value="@Model.Name"/>
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Save Changes</button>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
