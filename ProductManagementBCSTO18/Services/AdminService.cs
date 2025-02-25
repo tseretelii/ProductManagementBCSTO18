@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ProductManagementBCSTO18.Interfaces;
 using ProductManagementBCSTO18.Models;
 using ProductManagementBCSTO18.Models.Entities;
+using ProductManagementBCSTO18.Models.VM.Account;
 using ProductManagementBCSTO18.Models.VM.Admin;
 
 namespace ProductManagementBCSTO18.Services
@@ -12,11 +14,13 @@ namespace ProductManagementBCSTO18.Services
         private readonly ApplicationDbContext _context;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
-        public AdminService(ApplicationDbContext context, UserManager<User> userManager, SignInManager<User> signInManager)
+        private readonly RoleManager<IdentityRole> _roleManager;
+        public AdminService(ApplicationDbContext context, UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager)
         {
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager;
         }
 
         public async Task<List<GetAllUsersViewModel>> Index()
@@ -44,6 +48,7 @@ namespace ProductManagementBCSTO18.Services
             {
                 var userView = new GetAllUsersViewModel()
                 {
+                    Id = user.Id,
                     FirstName = user.FirstName, 
                     LastName = user.LastName,
                     CreateDate = user.CreateDate,
@@ -100,5 +105,86 @@ namespace ProductManagementBCSTO18.Services
 
             await _context.SaveChangesAsync();
         }
+
+        public async Task CreateUser(RegisterViewModel model)
+        {
+            var user = new User()
+            {
+                UserName = model.Email,
+                Email = model.Email,
+                FirstName = model.FirstName,
+                LastName = model.LastName
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+
+            if (result.Succeeded)
+            {
+                if (model.RoleSelected != null)
+                    await _userManager.AddToRoleAsync(user, model.RoleSelected);
+                else
+                    await _userManager.AddToRoleAsync(user, "User");
+                
+            }
+        }
+
+        public async Task<RegisterViewModel> EditUser(string Id)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == Id);
+
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            var roles = await _roleManager.Roles.ToListAsync();
+
+            var model = new RegisterViewModel()
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                RoleList = _roleManager.Roles.Select(x => x.Name).Select(x =>
+                new SelectListItem
+                {
+                    Text = x,
+                    Value = x
+                })
+            };
+            return model;
+        }
+
+        //public async Task EditUser(string Id, RegisterViewModel model)
+        //{
+            
+        //}
+
+        public async Task EditUser(RegisterViewModel model, string Id)
+        {
+            var oldUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == Id);
+
+            await _userManager.DeleteAsync(oldUser);
+
+            var user = new User()
+            {
+                UserName = model.Email,
+                Email = model.Email,
+                FirstName = model.FirstName,
+                LastName = model.LastName
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+
+            if (result.Succeeded)
+            {
+                if (model.RoleSelected != null)
+                    await _userManager.AddToRoleAsync(user, model.RoleSelected);
+                else
+                    await _userManager.AddToRoleAsync(user, "User");
+
+            }
+        }
+
+        //public Task EditUser(RegisterViewModel model, string Id)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }

@@ -1,4 +1,5 @@
 ﻿using ProductManagementBCSTO18.Models.Entities;
+using ProductManagementBCSTO18.Models.VM.Account;
 using ProductManagementBCSTO18.Models.VM.Admin;
 
 namespace ProductManagementBCSTO18.Interfaces
@@ -11,5 +12,8 @@ namespace ProductManagementBCSTO18.Interfaces
         Task<RolesViewModel> EditRole(string Id);
         Task EditRole(RolesViewModel model, string Id);
         Task DeleteRole(string Id);
+        Task CreateUser(RegisterViewModel model);
+        Task<RegisterViewModel> EditUser(string Id);
+        Task EditUser(RegisterViewModel model, string Id);
     }
 }

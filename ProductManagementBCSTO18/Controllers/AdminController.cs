@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using ProductManagementBCSTO18.Interfaces;
+using ProductManagementBCSTO18.Models.VM.Account;
 using ProductManagementBCSTO18.Models.VM.Admin;
 
 namespace ProductManagementBCSTO18.Controllers
@@ -9,10 +12,13 @@ namespace ProductManagementBCSTO18.Controllers
     public class AdminController : Controller
     {
         private readonly IAdminService _adminService;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public AdminController(IAdminService adminService)
+
+        public AdminController(IAdminService adminService, RoleManager<IdentityRole> roleManager)
         {
             _adminService = adminService;
+            _roleManager = roleManager;
         }
 
         public async Task<IActionResult> Index()
@@ -54,6 +60,38 @@ namespace ProductManagementBCSTO18.Controllers
         public async Task<IActionResult> DeleteRole(string Id)
         {
             await _adminService.DeleteRole(Id);
+            return RedirectToAction("Index");
+        }
+        [HttpGet]
+        public IActionResult CreateUser()
+        {
+            RegisterViewModel model = new RegisterViewModel()
+            {
+                RoleList = _roleManager.Roles.Select(x => x.Name).Select(x =>
+                new SelectListItem
+                {
+                    Text = x,
+                    Value = x
+                })
+            };
+            return View(model);
+        }
+        [HttpPost]
+        public async Task<IActionResult> CreateUser(RegisterViewModel model)
+        {
+            await _adminService.CreateUser(model);
+            return RedirectToAction("Index");
+        }
+        [HttpGet]
+        public async Task<IActionResult> EditUser(string Id)
+        {
+            var result = await _adminService.EditUser(Id);
+            return View(result);
+        }
+        [HttpPost]
+        public async Task<IActionResult> EditUser(string Id, RegisterViewModel model)
+        {
+            await _adminService.EditUser(model, Id);
             return RedirectToAction("Index");
         }
     }
