@@ -15,5 +15,6 @@ namespace ProductManagementBCSTO18.Interfaces
         Task CreateUser(RegisterViewModel model);
         Task<RegisterViewModel> EditUser(string Id);
         Task EditUser(RegisterViewModel model, string Id);
+        Task DeleteUser(string Id);
     }
 }

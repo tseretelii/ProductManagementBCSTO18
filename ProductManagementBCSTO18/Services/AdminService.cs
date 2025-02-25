@@ -182,6 +182,13 @@ namespace ProductManagementBCSTO18.Services
             }
         }
 
+        public async Task DeleteUser(string Id)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == Id);
+
+            await _userManager.DeleteAsync(user);
+        }
+
         //public Task EditUser(RegisterViewModel model, string Id)
         //{
         //    throw new NotImplementedException();

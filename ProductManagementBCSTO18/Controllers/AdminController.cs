@@ -94,5 +94,11 @@ namespace ProductManagementBCSTO18.Controllers
             await _adminService.EditUser(model, Id);
             return RedirectToAction("Index");
         }
+        [HttpGet]
+        public async Task<IActionResult> DeleteUser(string Id)
+        {
+            await _adminService.DeleteUser(Id);
+            return RedirectToAction("Index");
+        }
     }
 }
